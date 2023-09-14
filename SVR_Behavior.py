@@ -6,11 +6,20 @@ import pandas as pd
 
 df = pd.read_csv("data.csv")
 
-
-
-def svr_scores(df):
-    scores = {}
-    lsm = {}
+def svr_scores(df: pd.DataFrame) -> tuple:
+    """
+    Calculate R-squared scores and Least Squares Method (LSM) for each column in the DataFrame.
+    
+    Arguments:
+        df (pd.DataFrame): The input DataFrame.
+        
+    Returns:
+        tuple: A tuple containing two dictionaries. The first dictionary contains the R-squared scores
+               for each column, and the second dictionary contains the LSM scores for each column.
+    """
+    
+    scores = {}  # Store the R-squared scores for each column
+    lsm = {}  # Store the LSM scores for each column
     
     # Iterate over each column in the DataFrame
     for column in df.columns:
@@ -38,5 +47,6 @@ def svr_scores(df):
         # Store the scores for the column
         scores[column] = r2
         lsm[column] = lsm_score    
+        
     return scores, lsm
 
