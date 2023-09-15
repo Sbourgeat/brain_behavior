@@ -177,15 +177,21 @@ umap_male = pd.DataFrame(data=umap_male)
 umap_male.columns = ['x', 'y'] 
 umap_male["morphology"] = morpho_male
 umap_male["dgrp"] = data_male["dgrp"].values
+umap_male["entropy0"] = data_male["entropy0"].values
+umap_male["entropy1"] = data_male["entropy1"].values
+umap_male["entropy2"] = data_male["entropy2"].values
 
 # Merge umap_female and morpho_female
 umap_female = pd.DataFrame(data=umap_female)
 umap_female.columns = ['x', 'y']
 umap_female["morphology"] = morpho_female
 umap_female["dgrp"] = data_female["dgrp"].values
+umap_female["entropy0"] = data_female["entropy0"].values
+umap_female["entropy1"] = data_female["entropy1"].values
+umap_female["entropy2"] = data_female["entropy2"].values
 
 
-# plot the umap output with plotly
+"""# plot the umap output with plotly
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=umap_male['x'], y=umap_male['y'], mode='markers', marker_color=umap_male['morphology'], marker_size=10))
 fig.update_layout(title='Behavioural Landscape from DGRP Males')
@@ -196,8 +202,8 @@ fig.add_trace(go.Scatter(x=umap_female['x'], y=umap_female['y'], mode='markers',
 fig.update_layout(title='Behavioural Landscape from DGRP Females')
 fig.show()
 
-
-"""# Save umap_male and umap_female as csv
+"""
+# Save umap_male and umap_female as csv
 umap_male.to_csv("umap_male.csv", index=False)
-umap_female.to_csv("umap_female.csv", index=False)"""
+umap_female.to_csv("umap_female.csv", index=False)
 
