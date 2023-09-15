@@ -54,4 +54,3 @@ merged_data_female = merge_data_female(data_female, female)
 merged_data_male.to_csv('dgrpool_brain_behavior_male.csv')
 merged_data_female.to_csv('dgrpool_brain_behavior_female.csv')
 
-

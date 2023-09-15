@@ -41,7 +41,11 @@ head(data_dgrps)
 #open phenotypes_to_use.csv
 phenotypes_to_use <- read.csv("/Users/skumar/Documents/PhD/BrainAnalysis/Behavior/brain_behavior/phenotypes_to_use.csv")
 # drop the rows having a type_of_behavior different than olfactory, aggresive, and locomotor
-phenotypes_to_use <- phenotypes_to_use[phenotypes_to_use$type_of_behavior == " olfactory" | phenotypes_to_use$type_of_behavior == " aggresive" | phenotypes_to_use$type_of_behavior == " locomotor",]
+phenotypes_to_use <- phenotypes_to_use[phenotypes_to_use$type_of_behavior == " olfactory" | 
+phenotypes_to_use$type_of_behavior == " aggresive" | phenotypes_to_use$type_of_behavior == " locomotor"
+| phenotypes_to_use$type_of_behavior == " food"
+| phenotypes_to_use$type_of_behavior == " sleep"
+| phenotypes_to_use$type_of_behavior == " phototaxi",]
 
 # Read all phenotypes from the JSON file
 library(jsonlite)
@@ -108,5 +112,6 @@ write.csv(data_male, "/Users/skumar/Documents/PhD/BrainAnalysis/Behavior/brain_b
 write.csv(data_female, "/Users/skumar/Documents/PhD/BrainAnalysis/Behavior/brain_behavior/data_female.csv", row.names = F)
 #write data_na as csv file
 write.csv(data_na, "/Users/skumar/Documents/PhD/BrainAnalysis/Behavior/brain_behavior/data_na.csv", row.names = F)
+
 
 
