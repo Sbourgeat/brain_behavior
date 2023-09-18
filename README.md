@@ -1,5 +1,13 @@
 # brain_behavior
 Brain morphology and behaviour analyses
+
+- [[#Importing all the available data|Importing all the available data]]
+- [[#Extract the data for males and females|Extract the data for males and females]]
+- [[#Define the subset of phenotypes to use|Define the subset of phenotypes to use]]
+- [[#Find the studies ID|Find the studies ID]]
+- [[#Extraction of the relevant behavioural data|Extraction of the relevant behavioural data]]
+
+
 ***The repository to get all the scripts*** : https://github.com/Sbourgeat/brain_behavior
 # I- Extract all the relevant DGRP dataset
 **The script for this part is `dgrpool_behav.R`**
