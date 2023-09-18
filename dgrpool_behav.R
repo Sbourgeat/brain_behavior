@@ -7,18 +7,18 @@
 #
 ################################################
 
-
+# import the rds file from the DGRPpool github
 data_all_pheno <-  readRDS("/Users/skumar/Documents/PhD/BrainAnalysis/Behavior/data.all_pheno_21_03_23_filtered.rds") # nolint: line_length_linter.
 
-
 # print the number of phenotypes
-phenotypes_all <- unique(c(colnames(data_all_pheno[["F"]])[2:ncol(data_all_pheno[["F"]])],  # nolint
-                            colnames(data_all_pheno[["M"]])[2:ncol(data_all_pheno[["M"]])],  # nolint
-                            colnames(data_all_pheno[["NA"]])[2:ncol(data_all_pheno[["NA"]])])) # nolint
+#phenotypes_all <- unique(c(colnames(data_all_pheno[["F"]])[2:ncol(data_all_pheno[["F"]])],  # nolint
+#                            colnames(data_all_pheno[["M"]])[2:ncol(data_all_pheno[["M"]])],  # nolint
+#                            colnames(data_all_pheno[["NA"]])[2:ncol(data_all_pheno[["NA"]])])) # nolint
+#
+#message("Number phenotypes = ", length(phenotypes_all)) 
+#message("Number phenotypes (by sex) = ", ncol(data_all_pheno[["M"]]) + ncol(data_all_pheno[["F"]]) + ncol(data_all_pheno[["NA"]]) - 3) # nolint
 
-message("Number phenotypes = ", length(phenotypes_all))
-message("Number phenotypes (by sex) = ", ncol(data_all_pheno[["M"]]) + ncol(data_all_pheno[["F"]]) + ncol(data_all_pheno[["NA"]]) - 3) # nolint
-
+# Extract the data for males, females and NA
 data_male <- data_all_pheno[["M"]]
 data_female <- data_all_pheno[["F"]]
 data_na <- data_all_pheno[["NA"]]
@@ -31,21 +31,22 @@ print(data_male[["S1_1315"]])
 print(data_male[["dgrp"]])
 
 # import all DGRP data
-library(data.table)
-data_dgrps <- fread("https://dgrpool.epfl.ch/studies/1/get_file?name=dgrp_lines.tsv&namespace=downloads", sep = "\t", data.table = F)
+#library(data.table)
+#data_dgrps <- fread("https://dgrpool.epfl.ch/studies/1/get_file?name=dgrp_lines.tsv&namespace=downloads", sep = "\t", data.table = F) 
 
 #print head of data_dgrps
-head(data_dgrps)
+#head(data_dgrps)
 
 
 #open phenotypes_to_use.csv
-phenotypes_to_use <- read.csv("/Users/skumar/Documents/PhD/BrainAnalysis/Behavior/brain_behavior/phenotypes_to_use.csv")
+phenotypes_to_use <- read.csv("/Users/skumar/Documents/PhD/BrainAnalysis/Behavior/brain_behavior/phenotypes_to_use.csv")    
 # drop the rows having a type_of_behavior different than olfactory, aggresive, and locomotor
 phenotypes_to_use <- phenotypes_to_use[phenotypes_to_use$type_of_behavior == " olfactory" | 
 phenotypes_to_use$type_of_behavior == " aggresive" | phenotypes_to_use$type_of_behavior == " locomotor"
 | phenotypes_to_use$type_of_behavior == " food"
 | phenotypes_to_use$type_of_behavior == " sleep"
 | phenotypes_to_use$type_of_behavior == " phototaxi",]
+
 
 # Read all phenotypes from the JSON file
 library(jsonlite)
@@ -78,7 +79,7 @@ phenotypes_for_analysis <- data.frame(list_id, name)
 # write the dataframe phenotypes_for_analysis to a csv file, without the rows index
 write.csv(phenotypes_for_analysis, "/Users/skumar/Documents/PhD/BrainAnalysis/Behavior/brain_behavior/phenotypes_for_analysis.csv", row.names = F)
 
-# change the colnames of data_male to keep only the end 4 characters
+# change the colnames of data_male to keep only the end 4 characters which are the actual id of the phenotypes
 # Get the current column names
 current_names <- colnames(data_male)
 # Create new column names by keeping only the last four characters
