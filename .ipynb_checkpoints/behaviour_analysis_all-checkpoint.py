@@ -41,12 +41,10 @@ def merge_data(brain, behav, DGRP, sex=None, is_b2 = False):
     """
     if is_b2:
         data = behav[behav['genotype'].isin(DGRP)]
-        data['genotype'] = data['genotype'].apply(lambda x: 'DGRP_0' + x.split('dgrp')[1] if len(x.split('dgrp')[1]) == 2 else 'DGRP_' + x.split('dgrp')[1])
-
     else:
         data = behav[behav['genotype'].isin(DGRP) & behav["head_scanned"]==True]
-        data['genotype'] = data['genotype'].apply(lambda x: 'DGRP_0' + x.split('dgrp')[1] if len(x.split('dgrp')[1]) == 2 else 'DGRP_' + x.split('dgrp')[1])
-        brain['DGRP'] = brain['DGRP'].apply(lambda x: 'DGRP_0' + x if len(x) == 2 else 'DGRP_'+ x)
+    data['genotype'] = data['genotype'].apply(lambda x: 'DGRP_0' + x.split('dgrp')[1] if len(x.split('dgrp')[1]) == 2 else 'DGRP_' + x.split('dgrp')[1])
+    brain['DGRP'] = brain['DGRP'].apply(lambda x: 'DGRP_0' + x if len(x) == 2 else 'DGRP_'+ x)
 
     
     data.rename(columns={'genotype': 'DGRP'}, inplace=True)
@@ -121,15 +119,15 @@ for i, row in enumerate(correlation_matrix.values):
                 y=names[i],
                 text=f"p-value: {p_values.iloc[i, j]:.3f}",
                 showarrow=False,
-                font=dict(size=15, color="white" if abs(value) > 0.5 else "black")
+                font=dict(color="white" if abs(value) > 0.5 else "black")
             )
         )
 
 fig.update_layout(
     title="Correlation Coefficient and p-values",
     annotations=annotations,
-    xaxis=dict(title="Variable", tickfont=dict(size=15)),
-    yaxis=dict(title="Variable", tickfont=dict(size=15)),
+    xaxis=dict(title="Variable"),
+    yaxis=dict(title="Variable"),
 )
 
 fig.show()
