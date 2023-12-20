@@ -54,4 +54,8 @@ end
 genotypes = keys(models)
 kl_matrix = [kl_divergence[(g1, g2)] for g1 in genotypes for g2 in genotypes]
 kl_matrix = reshape(kl_matrix, length(genotypes), length(genotypes))
-heatmap(genotypes, genotypes, kl_matrix, aspect_ratio=1, color=:viridis, clim=(0, maximum(kl_matrix)))
+#save the kl_matrix as csv
+kl_df = DataFrame(kl_matrix, collect(genotypes))
+CSV.write("kl_divergence.csv", kl_df)
+
+#heatmap(genotypes, genotypes, kl_df, aspect_ratio=1, color=:viridis, clim=(0, maximum(kl_matrix)))
