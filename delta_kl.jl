@@ -11,10 +11,7 @@ using StatsFuns
 behaviour = CSV.read("summary_all.csv", DataFrame)
 
 # Filter the DataFrame to keep only the rows where exp_type == "operant_place", shock_color == 'green', and 'dgrp' is in the genotype column
-behaviour = behaviour[(behaviour.exp_type .== "operant_place") .& 
-                      (behaviour.shock_color .== "green") .& 
-                      occursin.("dgrp", behaviour.genotype)]
-
+behaviour = filter(row -> row.exp_type == "operant_place" && row.shock_color == "green" && occursin("dgrp", row.genotype), behaviour)
 # Group the DataFrame by genotype and get the distribution of frac_time_on_shockArm for each genotype
 distributions = groupby(behaviour, :genotype)
 
@@ -23,8 +20,11 @@ models = Dict()
 
 # Model each genotype
 for genotype in keys(distributions)
-    # Get the data for this genotype
+    # Get the data for this genotype, replace "NA" with missing, remove missing values, and convert to Float64
     data = distributions[genotype].frac_time_on_shockArm
+    data = replace(data, "NA" => missing)
+    data = collect(skipmissing(data))
+    data = parse.(Float64, data)
 
     # Define the model
     @model function model(data)
@@ -44,37 +44,36 @@ for genotype in keys(distributions)
 end
 
 # Create an empty DataFrame to store the KL divergence values
-kl_divergence = DataFrame(Matrix{Float64}(undef, length(distributions), length(distributions)), keys(distributions), keys(distributions))
+kl_divergence = DataFrame()
+
+# Get the keys of the distributions dictionary as a Vector of strings
+keys_str = string.(collect(keys(distributions)))
+
+# Add columns to the DataFrame
+for key in keys_str
+    kl_divergence[!, key] = Vector{Float64}(undef, length(distributions))
+end
 
 # Calculate the KL divergence for each pair of distributions
-for (i, genotype_i) in enumerate(keys(distributions))
-    for (j, genotype_j) in enumerate(keys(distributions))
-        # Sample from the posterior distributions to get the inferred distributions
-        post_pred_i = rand(models[genotype_i], 1000)
-        post_pred_j = rand(models[genotype_j], 1000)
+for (i, genotype_i) in enumerate(keys(models))
+    for (j, genotype_j) in enumerate(keys(models))
+        # Get the posterior samples of mu and sigma for the two genotypes
+        samples_i = DataFrame(models[genotype_i])
+        samples_j = DataFrame(models[genotype_j])
 
-        # Normalize the distributions to make them valid probability distributions
-        dist_i = normalize(post_pred_i, 1)
-        dist_j = normalize(post_pred_j, 1)
+        # Estimate the PDFs of the Normal distributions for the two genotypes
+        pdf_i = x -> mean(pdf(Normal(mu, sigma), x) for (mu, sigma) in eachrow(samples_i))
+        pdf_j = x -> mean(pdf(Normal(mu, sigma), x) for (mu, sigma) in eachrow(samples_j))
 
-        # Interpolate the distributions to make them the same length
-        if length(dist_i) != length(dist_j)
-            x = range(0, stop=1, length=length(dist_i))
-            f = LinearInterpolation(x, dist_i, extrapolation_bc=Line())
-            x_new = range(0, stop=1, length=length(dist_j))
-            dist_i = f(x_new)
-        end
-
-        # Calculate the KL divergence and store it in the DataFrame
-        kl_divergence[i, j] = kl_div(dist_i, dist_j)
+        # Calculate the KL divergence between the two PDFs
+        kl_divergence[i, j] = sum(pdf_i(x) * (log(pdf_i(x)) - log(pdf_j(x))) for x in -10:0.01:10)
+        println("KL divergence between $genotype_i and $genotype_j: $(kl_divergence[i, j])")
     end
 end
 
-# Save kl_divergence as a CSV file
-CSV.write("kl_matrix.csv", kl_divergence)
 
-# Convert the KL divergence DataFrame to a matrix
+# Convert the DataFrame to a Matrix
 kl_matrix = Matrix(kl_divergence)
 
 # Create a heatmap
-heatmap(kl_divergence.columns, kl_divergence.index, kl_matrix, title="KL Divergence between Genotypes", xlabel="Genotype", ylabel="Genotype")
+heatmap(keys_str, keys_str, kl_matrix, aspect_ratio=1, color=:viridis, clim=(0, maximum(kl_matrix)))
