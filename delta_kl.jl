@@ -36,16 +36,22 @@ for g in genotypes
     models[genotype] = chain
 end
 
+# Generate posterior predictive distributions
+posterior_predictive = Dict{String, Vector{Float64}}()
+
+for (genotype, chain) in models
+    mu_samples = chain[:mu]
+    sigma_samples = chain[:sigma]
+    predictive_samples = [rand(Normal(mu, sigma)) for (mu, sigma) in zip(mu_samples, sigma_samples)]
+    posterior_predictive[genotype] = predictive_samples
+end
+
 # Calculate pairwise KL divergence
 kl_divergence = Dict{Tuple{String, String}, Float64}()
 
-for (g1, chain1) in models
-    for (g2, chain2) in models
-        mu1 = mean(chain1[:mu])
-        sigma1 = mean(chain1[:sigma])
-        mu2 = mean(chain2[:mu])
-        sigma2 = mean(chain2[:sigma])
-        kl = kldivergence(Normal(mu1, sigma1), Normal(mu2, sigma2))
+for (g1, samples1) in posterior_predictive
+    for (g2, samples2) in posterior_predictive
+        kl = kldivergence(empirical(samples1), empirical(samples2))
         kl_divergence[(g1, g2)] = kl
     end
 end
