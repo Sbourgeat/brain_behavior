@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.express as px
 
 # Import the KL divergence
-kl = pd.read_csv('kl_divergence.csv', header=None)
+kl = pd.read_csv('kl_divergence_normal.csv', header=None)
 
 # Set the first row as the column names
 kl.columns = kl.iloc[0, :]
@@ -18,4 +18,15 @@ kl.index.name = None
 print(kl)
 # Plot the KL divergence as a heatmap
 fig = px.imshow(kl)
+
+# Add legends and axis names
+fig.update_layout(
+    title="KL Divergence Heatmap",
+    xaxis_title="Genotype",
+    yaxis_title="Genotype",
+    coloraxis_colorbar=dict(
+        title="KL Divergence",
+    )
+)
+
 fig.show()

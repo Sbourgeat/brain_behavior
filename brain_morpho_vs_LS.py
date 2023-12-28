@@ -47,7 +47,7 @@ def merge_data(brain, behav, DGRP, sex=None, is_b2 = False):
         data['genotype'] = data['genotype'].apply(lambda x: 'DGRP_0' + x.split('dgrp')[1] if len(x.split('dgrp')[1]) == 2 else 'DGRP_' + x.split('dgrp')[1])
 
     else:
-        data = behav[behav['genotype'].isin(DGRP) & behav["head_scanned"]==True]
+        data = behav[behav['genotype'].isin(DGRP)] #& behav["head_scanned"]==True]
         data['genotype'] = data['genotype'].apply(lambda x: 'DGRP_0' + x.split('dgrp')[1] if len(x.split('dgrp')[1]) == 2 else 'DGRP_' + x.split('dgrp')[1])
         brain['DGRP'] = brain['DGRP'].apply(lambda x: 'DGRP_0' + x if len(x) == 2 else 'DGRP_'+ x)
 
@@ -118,13 +118,13 @@ brain2['DGRP'] = brain2['DGRP'].astype(str)
 # merge brain and brain2 based on DGRP and sex
 brain = pd.merge(brain, brain2, on=['DGRP','sex'])
 
-behav = behav[behav['head_scanned'] == True]
+#behav = behav[behav['head_scanned'] == True]
 DGRP,sex = split_string_with_dgrp(behav)
 
 # Group by 'genotype' and 'sex' and calculate the mean of 'ls'
 
 # Group by 'genotype', 'sex', and 'head_scanned' and calculate the mean of 'ls'
-average_ls_per_genotype_sex = behav.groupby(['genotype', 'sex', 'head_scanned'])['ls'].mean().reset_index()
+average_ls_per_genotype_sex = behav.groupby(['genotype', 'sex'])['ls'].mean().reset_index()
 
 merged_df = merge_data(brain, average_ls_per_genotype_sex, DGRP, sex)
 
@@ -176,9 +176,9 @@ fig.update_layout(
 )
 
 #fig.show()
-fig.write_html("results/correlation_matrix_ls_vs_macro_entropy_morphology_scanned.html")
+#fig.write_html("results/correlation_matrix_ls_vs_macro_entropy_morphology_scanned.html")
 
-"""
+
 # Select the columns to include in the scatter plot matrix
 df = merged_df[["abs_volume","h_ratio","entropy0","entropy1","entropy2","ls"]]
 
@@ -186,4 +186,4 @@ df = merged_df[["abs_volume","h_ratio","entropy0","entropy1","entropy2","ls"]]
 scatter_matrix(df, alpha=0.2, figsize=(10, 10), diagonal='kde')
 
 # Show the plot
-plt.show()"""
+plt.show()
