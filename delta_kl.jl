@@ -10,21 +10,22 @@ using KernelDensity
 using QuadGK
 using Statistics
 
-
 # Import and filter data
-behaviour = CSV.read("summary_all.csv", DataFrame)
+behaviour = CSV.read("summary_with_learningscore_pl_green_70genotypes.csv", DataFrame)
 behaviour = filter(row -> row.exp_type == "operant_place" && row.shock_color == "green" && occursin("dgrp", row.genotype), behaviour)
 
-# Remove rows where frac_time_on_shocked is NA
-behaviour = dropmissing(behaviour, :frac_time_on_shocked)
+# Remove rows where ls is NA
+behaviour.ls = replace(behaviour.ls, "NA" => missing)
+
+behaviour = dropmissing(behaviour, :ls)
 # Convert the column to Float64
-behaviour.frac_time_on_shocked = parse.(Float64, behaviour.frac_time_on_shocked)
+behaviour.ls = parse.(Float64, behaviour.ls)
 # Calculate the mean and standard deviation of the column
-mean_frac_time_on_shocked = mean(behaviour.frac_time_on_shocked)
-std_frac_time_on_shocked = std(behaviour.frac_time_on_shocked)
+mean_ls = mean(behaviour.ls) 
+std_ls = std(behaviour.ls)
 
 # Z-score normalize the column
-behaviour.frac_time_on_shocked = (behaviour.frac_time_on_shocked .- mean_frac_time_on_shocked) ./ std_frac_time_on_shocked
+behaviour.ls = (behaviour.ls .- mean_ls) ./ std_ls
 
 # Define the model
 @model function model(data)
@@ -41,10 +42,15 @@ end
 # Group by genotype and model each group
 genotypes = groupby(behaviour, :genotype)
 models = Dict{String, Chains}()
+# Filter the DataFrame for 'dgrp584'
+dgrp584_df = genotypes[1]
+
+# Plot the 'ls' values
+
 
 for g in genotypes
     genotype = g.genotype[1]
-    data = g.frac_time_on_shockArm
+    data = g.ls
     chain = sample(model(data), NUTS(), 3000)
     models[genotype] = chain
 end
@@ -72,10 +78,10 @@ end
 
 
 # Get the PDF for "dgrp584"
-pdf_dgrp584 = posterior_predictive_pdf["dgrp721"]
+pdf_dgrp584 = posterior_predictive_pdf["dgrp584"]
 
 # Generate a range of x values
-x_values = range(minimum(posterior_predictive["dgrp721"]), maximum(posterior_predictive["dgrp721"]), length=1000)
+x_values = range(minimum(posterior_predictive["dgrp584"]), maximum(posterior_predictive["dgrp584"]), length=1000)
 
 # Calculate the PDF values for the range of x values
 pdf_values = pdf_dgrp584.(x_values)
