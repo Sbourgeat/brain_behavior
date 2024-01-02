@@ -9,7 +9,7 @@ import plotly.express as px
 # import the KL divergence
 kl = pd.read_csv('kl_divergence.csv')
 
-# import the bottleneck distances
+# import the bottleneck distances whic is a np file
 bottleneck = pd.read_csv('bottleneck.csv')
 
 
