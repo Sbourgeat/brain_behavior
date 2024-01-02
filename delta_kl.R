@@ -54,6 +54,12 @@ models <- genotypes %>% summarise(model = list(model(ls)))
 # Generate the forest plot for each model
 models$model %>% purrr::map(~brms::forest(.))
 
+# Perform a posterior predictive check for each model
+models$model %>% purrr::map(~brms::pp_check(.))
+
+# Calculate the LOO for each model
+models$model %>% purrr::map(~brms::loo(.))
+
 # Extract the posterior predictive distribution for each genotype
 posterior_predictive <- lapply(models$model, posterior_predict, nsamples = 1000)
 
