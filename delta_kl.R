@@ -51,6 +51,8 @@ model <- function(data) {
 # Model each group
 models <- genotypes %>% summarise(model = list(model(ls)))
 
+# Generate the forest plot for each model
+models$model %>% purrr::map(~brms::forest(.))
 
 # Extract the posterior predictive distribution for each genotype
 posterior_predictive <- lapply(models$model, posterior_predict, nsamples = 1000)
