@@ -11,7 +11,7 @@ library(posterior)
 library(entropy)
 library(heatmaply)
 library(webshot)
-
+library(bayesplot)
 
 
 
@@ -48,11 +48,11 @@ model <- function(data) {
     return(fit)
 }
 
-# Model each group
-models <- genotypes %>% summarise(model = list(model(ls)))
+# Model each group#####################################################
+models <- genotypes %>% summarise(model = list(model(ls)))################### long to run!!!
+###########################################################################
 
-# Generate the forest plot for each model
-models$model %>% purrr::map(~brms::forest(.))
+
 
 # Perform a posterior predictive check for each model
 models$model %>% purrr::map(~brms::pp_check(.))
