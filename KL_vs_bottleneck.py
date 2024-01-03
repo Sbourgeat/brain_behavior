@@ -31,6 +31,7 @@ import plotly.express as px
 from scipy.stats import pearsonr
 import plotly.graph_objects as go
 from sklearn.preprocessing import StandardScaler
+import numpy as np 
 
 # Define a function to transform the string
 def transform_string(s):
@@ -40,13 +41,14 @@ def transform_string(s):
 
 
 # import the KL divergence
-kl = pd.read_csv('kl_divergence_normal.csv')
+kl = pd.read_csv('kl_matrix_new_working.csv')
 
 
 # Apply the function to the column names
 kl.columns = kl.columns.map(transform_string)
-kl.index = kl.columns
-
+kl.set_index(kl.columns[0], inplace=True)
+# Apply the function to the row index names
+kl.index = kl.index.map(transform_string)
 
 # import the bottleneck distances whic is a np file
 bottleneck = pd.read_csv('/home/samuel/brainMorpho/Analysis_results/homology2voxel_pairwise/bottleneck_matrix.csv')
@@ -93,72 +95,6 @@ common_columns = kl.columns.intersection(bottleneck_female.columns)
 # Filter the DataFrames to keep only the common columns
 kl_female = kl.loc[common_columns, common_columns]
 bottleneck_female = bottleneck_female.loc[common_columns, common_columns]
-
-
-
-# Calculate the correlation between kl_male and bottleneck_male
-correlation_male = kl_male.corrwith(bottleneck_male)
-
-# Calculate the correlation between kl_female and bottleneck_female
-correlation_female = kl_female.corrwith(bottleneck_female)
-
-# Print the correlations
-print("Correlation Male:\n", correlation_male)
-print("Correlation Female:\n", correlation_female)
-
-
-
-
-# Initialize empty dictionaries to store the p-values
-pvalues_male = {}
-pvalues_female = {}
-
-# Calculate the p-values for males
-for column in kl_male.columns:
-    correlation, pvalue = pearsonr(kl_male[column], bottleneck_male[column])
-    pvalues_male[column] = pvalue
-
-# Calculate the p-values for females
-for column in kl_female.columns:
-    correlation, pvalue = pearsonr(kl_female[column], bottleneck_female[column])
-    pvalues_female[column] = pvalue
-
-# Print the p-values
-print("P-values Male:\n", pvalues_male)
-print("P-values Female:\n", pvalues_female)
-
-
-
-
-
-# Create a DataFrame from the correlation and p-values dictionaries
-df_male = pd.DataFrame({'Correlation': correlation_male, 'P-value': pvalues_male})
-df_female = pd.DataFrame({'Correlation': correlation_female, 'P-value': pvalues_female})
-
-# Create the heatmaps
-fig_male = go.Figure(data=go.Heatmap(
-    z=df_male['Correlation'],
-    x=df_male.index,
-    y=['Correlation'],
-    text=df_male['P-value'].apply(lambda p: f'p={p:.3f}'),
-    hoverinfo='text',
-    colorscale='Viridis'
-))
-fig_male.update_layout(title='Correlation and P-values for Males')
-
-fig_female = go.Figure(data=go.Heatmap(
-    z=df_female['Correlation'],
-    x=df_female.index,
-    y=['Correlation'],
-    text=df_female['P-value'].apply(lambda p: f'p={p:.3f}'),
-    hoverinfo='text',
-    colorscale='Viridis'
-))
-fig_female.update_layout(title='Correlation and P-values for Females')
-
-# Show the plots
-fig_male.show()
-fig_female.show()
 
 
 
@@ -221,4 +157,92 @@ fig.update_layout(
 fig.show()
 
  #save as html
-fig.write_html("KL_normal_vs_bottleneck.html")
+fig.write_html("KL_mcmc_vs_bottleneck.html")
+
+
+
+# Calculate the correlation coefficient for males
+correlation_male = np.corrcoef(df_plot_male['KL Male'], df_plot_male['Bottleneck Male'])[0, 1]
+
+# Calculate the correlation coefficient for females
+correlation_female = np.corrcoef(df_plot_female['KL Female'], df_plot_female['Bottleneck Female'])[0, 1]
+
+print(f"Correlation coefficient for males: {correlation_male}")
+print(f"Correlation coefficient for females: {correlation_female}")
+
+
+
+
+
+
+
+from sklearn.metrics import r2_score
+
+# Fit a line to the male data
+male_line = np.polyfit(df_plot_male['KL Male'], df_plot_male['Bottleneck Male'], 1)
+male_r2 = r2_score(df_plot_male['Bottleneck Male'], np.polyval(male_line, df_plot_male['KL Male']))
+
+# Fit a line to the female data
+female_line = np.polyfit(df_plot_female['KL Female'], df_plot_female['Bottleneck Female'], 1)
+female_r2 = r2_score(df_plot_female['Bottleneck Female'], np.polyval(female_line, df_plot_female['KL Female']))
+
+# Create the scatter plot
+fig = go.Figure()
+
+# Add male scatter trace
+fig.add_trace(go.Scatter(
+    x=df_plot_male['KL Male'],
+    y=df_plot_male['Bottleneck Male'],
+    mode='markers',
+    name='Males',
+    marker=dict(color='red')
+))
+
+# Add male regression line trace
+fig.add_trace(go.Scatter(
+    x=df_plot_male['KL Male'],
+    y=np.polyval(male_line, df_plot_male['KL Male']),
+    mode='lines',
+    name=f'Males (R2 = {male_r2:.2f})',
+    line=dict(color='red')
+))
+
+# Add female scatter trace
+fig.add_trace(go.Scatter(
+    x=df_plot_female['KL Female'],
+    y=df_plot_female['Bottleneck Female'],
+    mode='markers',
+    name='Females',
+    marker=dict(color='purple')
+))
+
+# Add female regression line trace
+fig.add_trace(go.Scatter(
+    x=df_plot_female['KL Female'],
+    y=np.polyval(female_line, df_plot_female['KL Female']),
+    mode='lines',
+    name=f'Females (R2 = {female_r2:.2f})',
+    line=dict(color='purple')
+))
+
+# Add labels and title
+fig.update_layout(
+    title='Comparison between Normalized KL and Normalized Bottleneck',
+    xaxis_title='Normalized KL',
+    yaxis_title='Normalized Bottleneck',
+    plot_bgcolor='rgba(0,0,0,0)',  # this sets the plot background color to transparent
+    paper_bgcolor='rgba(0,0,0,0)',  # this sets the paper (around the plot) background color to transparent
+)
+
+# Show the plot
+fig.show()
+
+fig.write_html("KL_mcmc_vs_bottleneck.html")
+
+
+#save df_plot_male and df_plot_female as csv
+# Save df_plot_male as a CSV file
+df_plot_male.to_csv('KLB_MCMC_male.csv', index=False)
+
+# Save df_plot_female as a CSV file
+df_plot_female.to_csv('KLB_MCMC_female.csv', index=False)
