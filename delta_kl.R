@@ -88,7 +88,7 @@ for (i in 1:length(posterior_predictive_discrete)) {
 }
 
 # save the kl matrix
-write.csv(kl_matrix, "kl_matrix_new_working.csv")
+write.csv(kl_matrix, "kl_matrix_new_working.csv", row.names = TRUE)
 
 # Get the unique genotypes
 genotype_names <- unique(behaviour$genotype)
