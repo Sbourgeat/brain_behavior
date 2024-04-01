@@ -13,6 +13,10 @@ jupyter = "^1.0.0"
 graphviz = "^0.20.1"
 seaborn = "^0.13.2"
 scikit-learn = "^1.4.1.post1"
+plotly = "^5.20.0"
+plotly-express = "^0.4.1"
+bambi = "^0.13.0"
+dowhy = "^0.11.1"
 
 
 

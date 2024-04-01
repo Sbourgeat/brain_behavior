@@ -232,10 +232,14 @@ if __name__ == "__main__":
     print(full_data.head())
     input('Press Enter to continue...')
 
-    var1 = standardization(full_data['canonical_micro_to_cluster_entropies'])
-    var2 = standardization(full_data['KL_ls'])
 
-    var_names = ['canonical_micro_to_cluster_entropies', 'KL_ls']
+    #var1 = standardization(full_data['canonical_micro_to_cluster_entropies'])
+    #var2 = standardization(full_data['KL_ls'])
+
+    var1 = standardization(full_data['alpha_entropy0'])
+    var2 = standardization(full_data['alpha_entropy2'])
+
+    var_names = ['alpha_entropy0', 'alpha_entropy2']
     
     # observation joint plot
     joint_plot(full_data, var1, var2, var_names)
